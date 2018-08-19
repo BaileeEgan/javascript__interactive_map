@@ -9,6 +9,6 @@ index.html
 - Contains html for canvas, information box, and zoom buttons
 
 ancor_map.png
-- 1700x1700px image of Ancor
+- 1700x1700px blank image of Ancor (see below)
 
 ![alt text](https://github.com/BaileeEgan/javascript__interactive_map/blob/master/ancor_map.png)
