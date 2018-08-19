@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type = "text/javascript">
+        $(document).ready(function() {
+		
+			// Creates method for strings for easy capitalization
+			String.prototype.capitalize = function() { return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase() }) }
+            
+			// Source of map file (must be in jpeg, png, or likewise)
+			var map_src = "ancor_map.png"
+			
+			// Variable for size of map in pixels (map must be square)
+			var map_size = 1700
+			
+			// Object database for map locations
+			// Coordinates are in units of 'true' pixels, i.e. pixel coordinates on full-sized map
+			var library = [
+				//{ name: "", x: , y:, type:, region:"", link:"", description: "", zoom: },
+				{ name: "Midsol", x: 840, y: 900, type: "region", region: "midsol", link: "", description: "The Midsol Plains are the heartlands of Ancor. Solmerid is the capital of the Sun Kingdom, overlooking the forked river. Southeast of the kingdom, across the river, also lies Palumport, a port town, and the swamps, where old magic is believed to exist. Northern Midsol consists of soldier's barracks, farmland, and battlefields.", zoom: 1 },
+				{ name: "Vintoc", x: 500, y: 820, type: "region", region: "vintoc", link: "", description: "The Vintoc Plains are golden, windswept plains that are dotted by small villages, ruins, and battlefields. There are only a few large cities remaining, most of which lie on trade routes between Midsol and Tepmon. Life in Vintoc is slow and steady. Most are life-long farmers. Others are traders who rarely stay for long. The caves and groves of western Vintoc make excellent hideouts for refugees and bandits.", zoom: 1 },
+				{ name: "Ralit", x: 1000, y: 1350, type: "region", region: "ralit", link: "", description: "The Ralit Isles consist of the dense Lun Grove and strings of temperate islands connected by bridges. Farming, fishing, and trade are its main industries. The sea air is fresh, food delicious, locals friendly, and landscape beautiful nearly year-round. Yet Ralit remains one of the most dangerous places on Ancor. Banditry is rampant throughout the Isles. Several prominant bandit groups fight for control over regions, so the Sun Kingdom rarely intercedes south of the Lun Grove.", zoom: 1 },
+				{ name: "Tepmon", x: 200, y: 690, type: "region", region: "tepmon", link: "", description: "The Tepmon Peaks can be likened to an old abandoned temple rife with treasure. For this reason, Tepmon has become an awkward convergence of rugged mountain dwellers and scholars. The former unearth jewels, ore, and minerals from the mountain's veins and forge tools to be sold to the rest of Ancor. The latter seek secrets from the many caves and fortresses. The largest magic school is located here in Tepmon. Locals, however, are extremely wary of the school.", zoom: 1 },
+				{ name: "Altpin", x: 600, y: 450, type: "region", region: "altpin", link: "", description: "The Altpin Forest is an evergreen forest lining northern Ancor. It's frigid climate and barren landscape has deterred most human colonization, except for one group. This group is afflicted by a heritable curse, originating from the group's founder who spurned the sun god, Das. Little is known about its details, but the curse causes the bearer to turn pale white. Those attempting to study the curse were found dead, with heads and entrails hanging from the pine trees", zoom: 1 },
+				{ name: "Dens", x: 1144, y: 660, type: "region", region: "dens", link: "", description: "The Dens is large, expanding desert that covers the eastern half of Ancor. Sand dunes, rock formations, battlefields, and ruins comprise the desert. The northern Dens consists of rock quarries and bad land, which suprisingly, the beastmen Kalb call home. However, the sourthern portion is somewhat habitable as it lies on a delta plain. The abandoned temple city, Lunoren, stands here.", zoom: 1 },
+				{ name: "Janning", x: 880, y: 200, type: "region", region: "janning", link: "", description: "The Janning is Ancor's northernmost region. Its name, 'emptiness', describes its void of life. As the harshest region, the Janning is a land of fire and ice. Volcanoes jut the terrain, spewing lava onto ice floes. Blizzards roar throughout the entire year. Expeditions into the Janning are purely suicidal.", zoom: 1 },
+				
+				{ name: "Feljak Forest", x: 650, y: 650, type: "area", region: "midda", link: "", description: "The Feljak Forest is an impenetrable jungle bordering northern Midsol where the Kirjak, a group of lizard-like beastmen, live as well as other dangerous creatures. The trees are taller than most buildings in Solmerid. Frequent encounters with scholars and adventures have caused the Kirjak distrust humans, and so they use powerful magic to protect the forest.", zoom: 2 },
+				{ name: "Palum Swamp", x: 950, y: 990, type: "area", region: "midda", link: "", description: "The fog-filled Palum Swamp is a no-man's land. Those that enter the swamp tend to go missing. Many believe that witches reside here, beings that utilize old magic stemming from the land itself. To protec the swamp, witches have employed a fog that tricks the senses and causes intruders to lose their way.", zoom: 2 },
+				{ name: "Solmerid", x: 760, y: 840, type: "palace", region: "midda", link: "", description: "Solmerid is the capital of the Sun Kingdom and largest city in Ancor. The breathtaking Sun Palace overlooks the forked rivers and gleams in the daylight. The headquarters of the Mage's Guild is located here. Mages work in close association with the Sun Kingdom to apprehend rogue magical beings. The city is tiered, with rich folk living near the top. Those in poverty, however, find homes in the slums.", zoom: 2 },
+				{ name: "Palumport", x: 880, y: 1050, type: "town", region: "midda", link: "", description: "Palumport used to be a bustling port town connecting Ralit and Midsol. With the establishment of Bivlin to the west, Palumport's trade has died down. However, it stills serves freighters, albeit those unable to afford the tolls and protection of using Bivlin's harbor. Palumport has now become a meeting point for blackmarket and smuggling. ", zoom: 2 },
+				{ name: "Bivlin", x: 771, y: 923, type: "city", region: "midda", link: "", description: "Bivlin is the shining port city of Ancor. White stone lines pristine walkways, buildings, and arches. While Solmerid is the capital of the Sun Kingdom, Bivlin is its trade capital, connecting routes from Vintoc, Ralit, and Palumport.", zoom: 2 },
+				{ name: "Western garrison", x: 690, y: 865, type: "camp", region: "midda", link: "", description: "The western garrison is one of the military camps of the Sun Kingdom. It serves as a training ground and a defensive chokepoint against threats from western Ancor.", zoom: 3 },
+				{ name: "Eastern garrison", x: 815, y: 775, type: "camp", region: "midda", link: "", description: "The eastern garrison is one of the Sun Kingdom's military camps. It is the harsher of the two garrisons. Its primary purpose is to protect Solmerid against threats from the Dens Desert and the Feljak Forest.", zoom: 3 },
+				
+				{ name: "Aquila", x: 385, y: 853, type: "city", region: "vintoc", link: "", description: "Aquila is the Sun Kingdom's regional capital in Vintoc. It is mainly a trade and military city that controls trade between Tepmon and Vintoc, but Aquila also manages the supply of food for the kingdom's armies. A medium-sized harbor allows traders to ferry goods across the lake.", zoom: 2 },
+				{ name: "Eagle", x: 575, y: 815, type: "city", region: "vintoc", link: "", description: "Eagle is the second largest city in Vintoc behind Aquila. It is a residential trade hub for local farmers to sell their products and buy supplies. Eagle sits on the Midsol-Vintoc-Tepmon trade route so farmers needing a break from work often travel to Eagle to view the goods of traveling merchants.", zoom: 2 },
+				{ name: "Osprey", x: 440, y: 950, type: "town", region: "vintoc", link:"",  description: "Osprey is the largest bandit-run town in Vintoc. Controlled by a group known as the Sandhawks, Osprey is the center for smuggling goods between Tepmon and the rest of Ancor. The Sandhawks also have close ties to several bandit groups in Ralit, though they tend to not intercede in the southern bandit wars.", zoom: 2 },
+				
+				
+				{ name: "Aedarx", x: 164, y: 766, type: "fortress", region: "tepmon", link: "", description: "Aedarx is one of the first sites to be inhabited by humans. During the Dawn War, Aedarx became a grand fortress hewn into the mountain, which was mostly destroyed in the war. Currently, the fortress remains abandoned, but scholars often visit to study the remnants of its past.", zoom: 2 },
+				{ name: "Berij", x: 162, y: 862, type: "city", region: "tepmon", link: "", description: "Berij is the largest city in Tepmon, boasting the richest mines, best smithies, and close-knit folk. Locals distrust outsiders, especially scholars or mages. Unfortunately, Berij protects the path to Aedarx, so the city is frequented by these types.", zoom: 2 },
+				{ name: "Cunik", x: 278, y: 640, type: "town", region: "tepmon", link: "", description: "The northern town of Cunik would be a ghost town if it were not for its veins of precious metals. The town is tightly controlled by a wealthy and powerful family that has ruled since its establishment. Though this family is not officially tied to the Sun Kingdom, they work in close association with each other. In exchange for protection by the Sun Army, Cunik shares secrets gathered throughout Tepmon.", zoom: 2 },
+				{ name: "Anansi", x: 290, y: 790, type: "city", region: "tepmon", link: "", description: "Anansi is a trade city ruled by the Sun Kingdom that manages trade from Berij and Cunik. Its location between the lake and mountains provides good security from threats. Wealthy citizens enjoy a 'get-away' in Anansi. Nearby is the Anansi Mage School, the largest magic school in Ancor.", zoom: 2 },
+				{ name: "Mage School", x: 277, y: 760, type: "city", region: "tepmon", link: "", description: "The Anansi Mage School, is the largest, most prestigous magic school in Ancor. Hopeful students travel to Anansi to enroll in the school where they study the history and basics of magic. Only those with clear magical ability graduate. They will work as apprentices for mages throughout Ancor until their masters believe them ready to work independently.", zoom: 3 },
+				
+				{ name: "Aboreas", x: 490, y: 450, type: "city", region: "altpin", link: "", description: "Aboreas is the largest city in Altpin. Reports describe this site as a village in the trees, where inhabitants build houses and walkways above ground. The city consists of several layers, with each higher tier comprising of more powerful citizens.", zoom: 2 },
+				
+				{ name: "Dens Desert", x: 1130, y: 680, type: "area", region: "dens", link: "", description: "The Dens Desert continues to extend further into Midsol. In the past, the desert used to be much smaller. At the border between Midsol and the Dens, plants wither and the soil turns infertile. What this means for the capital has not been discussed.", zoom: 2 },
+				{ name: "Lunoren", x: 1200, y: 830, type: "fortress", region: "dens", link: "", description: "Lunoren is a temple built by the first humans to worship Nox. Lunoren was abandoned and destroyed in the Dawn War, and the Sun Kingdom has since outlawed anyone from traveling there, declaring the ground desecrated. This does not prevent certain people from finding the temple and undergoing a forbidden ritual.", zoom: 2 },
+				{ name: "Faragharast", x: 1111, y: 569, type: "camp", region: "dens", link: "", description: "Kalb are nomadic beastmen and rarely congregate into groups larger than extended family. However, Faragharast has become the largest Kalb camp, ruled by an alliance of several notorious Kalb bands. From Faragharast, these bands regularly raid human settlements.", zoom: 2 },
+				
+				
+				{ name: "Ferris", x: 640, y: 1024, type: "fortress", region: "ralit", link: "", description: "Ferris is the Sun Kingdom's southern stronghold, a stone fortress aimed to stop threats coming from Southern Ralit and protect Midsol's southern border. Tolls and identification are required to pass into Midsol, though not the other way around.", zoom: 2 },
+				{ name: "Navin", x: 980, y: 1300, type: "city", region: "ralit", link: "", description: "Navin is Ralit's main port that controls the water trade route to Palumport and Bivlin. While not officially managed by the Sun Kingdom, the city is heavily patrolled by the kingdom's army to protect trade from bandits and pirates. This has produced a great deal of tension between the city guards and locals.", zoom: 2 },
+				{ name: "Limpet", x: 1200, y: 1360, type: "town", region: "ralit", link: "", description: "Lembit is mainly a fishing and farming village inhabited by the Plober that supplies fish and other crops to the rest of Ralit.", zoom: 2 },
+				//{ name: "Vadosin", x: 1050, y: 1411, type: "town", region: "ralit", link: "", description: "", zoom: 2 },
+				{ name: "Piska", x: 1230, y: 1490, type: "town", region: "ralit", link: "", description: "Piska is a town of fun and merry-making. Piska has the largest brewery, brothel, and casino in Ralit. However, it's not uncommon for people to disappear after visiting Piska.", zoom: 2 },
+				{ name: "Blackwater", x: 1076, y: 1401, type: "city", region: "ralit", link: "", description: "Blackwater is one of the largest cities in southern Ralit as well as a bandit stronghold. One would expect crime to be rampant, but Blackwater's leader rules with an iron fist, so the city is actually one of the safest in the Isles (at least for a certain group).", zoom: 2 },
+				{ name: "Lun Grove", x: 730, y: 1100, type: "area", region: "ralit", link: "", description: "One can view the Lun Grove as either a simple path through the woods or a labrinth of trees. Because passing through Midsol and Ralit is common, the Sun Kingdom has kindly paved a walkway through the grove that takes less than a couple of hours on horseback. However, it is not uncommon for travellers to encounter dangerous beasts that chase them off their path. Most of which, never find their way back.", zoom: 2 },
+			]
+			
+			
+			// Variables for canvas element and context variable for drawing on canvas
+            var canvas = document.getElementById("canvas")
+            var ctx = canvas.getContext("2d")
+			
+			// Variable to hold image of map picture
+			var map_bg = new Image()
+			
+			// Object to hold mouse coordinates, ie where on the screen is clicked
+            var mouse = { x: 0, y: 0 }
+			
+			// Variables to calculate the amount of zoom
+			// set_zoom_level is the set variable in which zoom_level is interpolated to
+			var set_zoom_level = 1
+			var zoom_level = 1
+			
+			// Variables to calculate the displacement of the map where the center is the center of the screen
+			// set_center is the set variable in which center is interpolated to
+			var set_center = { x: map_size / 2, y: map_size / 2 }
+			var center = { x: map_size / 2, y: map_size / 2 }
+			
+			// Variable to calculate amount of scaling per level of zoom, calculated in function below
+			var scale_factor = 2.5
+			
+			// Function to easily calculate scaling multiplier based on zoom level (z can be set_zoom_level or zoom_level, depending on need)
+			var get_scale = function (z) {
+				return Math.pow(scale_factor, z - 1) * canvas.width / map_size
+			}
+			
+			// Camera object that holds coordinates for camera offset
+            var camera = { x: canvas.width / 2 - (center.x) * get_scale(zoom_level), y: canvas.height / 2 - (center.y) * get_scale(zoom_level) }
+            
+			// Function for distance between coordinates
+            var distance = function (x1, y1, x2, y2) {
+                var dx = x2 - x1
+                var dy = y2 - y1
+                return Math.sqrt(dx * dx + dy * dy)
+            }
+			
+				
+			// Array to hold point objects
+			var point_arr = []
+			
+			// Creates a Point Class that contains all information from library objects as well as methods for calculating screen position and drawing points on map
+			var Point = function (index) {
+				this.index = index
+				for (var key in library[index]) {
+					this[key] = library[index][key]
+				}
+			}
+			
+			// Transforms 'true' pixel coordinates into screen coordinates
+			Point.prototype.projCoord = function () {
+				return ({ 	
+					x: Math.round(this.x * get_scale(zoom_level) + camera.x),
+					y: Math.round(this.y * get_scale(zoom_level) + camera.y)
+				})
+			}
+			
+			// Draws point on map if at appropriate zoom level
+			Point.prototype.draw = function () {
+				if ((set_zoom_level >= this.zoom && this.zoom != 1) || (set_zoom_level == this.zoom && this.zoom == 1)) {
+					var proj = this.projCoord()
+					
+					var font_family = "Georgia"
+					var font_style = ""
+					var font_size = 10
+					var font_inc = 3
+					
+					ctx.fillStyle = "#615c52"
+					ctx.fillRect(proj.x - 5, proj.y - 5, 10, 10)
+	
+					// The following conditionals adjust size of font for different types of points
+					if (this.type == "region" || this.type == "area") {
+						font_style = "italic"
+						font_size = 18
+						font_inc = 6
+					}
+					if (this.type == "palace" || this.type == "fortress") {
+						font_style = "bold"
+						font_size = 16
+						font_inc = 6
+					}
+					if (this.type == "city") {
+						font_size = 12
+						font_inc = 4
+					}
+					
+					if (set_zoom_level == 2) font_size += font_inc
+					if (set_zoom_level == 3) font_size += font_inc * 2
+					
+					ctx.font = font_style + " " + font_size + "px " + font_family
+					
+					ctx.shadowColor = "white"
+					ctx.shadowOffsetX = 0
+					ctx.shadowOffsetY = 0
+					ctx.shadowBlur = 5
+					ctx.fillStyle = "black"
+					ctx.fillText(this.name, proj.x + 5, proj.y)
+				}
+			}
+          
+			// Function to load image and turn library of objects into Point class objects; draws map once image is loaded
+			var load = function() {
+				ctx.imageSmoothingEnabled = true
+				map_bg.onload = function() {
+					for (var i = 0; i < library.length; i++) {
+						point_arr.push(new Point(i))
+					}
+					draw()
+				}
+				map_bg.src = map_src
+			}
+			
+			
+			// Updates zoom level and coordinates for center of map using interpolation
+			var update = function() {
+				// Places bounds on the center coordinates, as to prevent displaying out-of-bound portions of the map
+				if (set_center.x < canvas.width / 2 / get_scale(set_zoom_level)) set_center.x = canvas.width / 2 / get_scale(set_zoom_level)
+				if (set_center.x > (map_size * get_scale(set_zoom_level) - canvas.width / 2) / get_scale(set_zoom_level)) set_center.x = (map_size * get_scale(set_zoom_level) - canvas.width / 2) / get_scale(set_zoom_level)
+				if (set_center.y < canvas.height / 2 / get_scale(set_zoom_level)) set_center.y = canvas.height / 2 / get_scale(set_zoom_level)
+				if (set_center.y > (map_size * get_scale(set_zoom_level) - canvas.height / 2) / get_scale(set_zoom_level)) set_center.y = (map_size * get_scale(set_zoom_level) - canvas.height / 2) / get_scale(set_zoom_level)
+				
+				// Interpolates zoom level to set value
+				zoom_level = zoom_level + (set_zoom_level - zoom_level) / 5
+				if (Math.abs(set_zoom_level - zoom_level) < 0.0001) {
+					zoom_level = set_zoom_level
+				}
+				
+				// Interpolates center coordinates to set values
+				center.x  = (center.x + (set_center.x - center.x) / 5)
+				center.y  = (center.y + (set_center.y - center.y) / 5)
+				if (Math.abs(center.x - set_center.x) < 0.1) {
+					center.x = set_center.x
+				}
+				if (Math.abs(center.y - set_center.y) < 0.1) {
+					center.y = set_center.y
+				}
+				
+				
+				
+				// Recalculates camera from zoom_level
+				camera = {
+					x: canvas.width / 2 - (center.x) * get_scale(zoom_level), 
+					y: canvas.height / 2 - (center.y) * get_scale(zoom_level) 
+				}
+				
+				// Invokes draw function to draw map and points
+				draw()
+				
+				// Only continue to update under these conditions
+				if (center.x != set_center.x || center.y != set_center.y || set_zoom_level != zoom_level) {
+				setTimeout(function() {
+						update()
+					}, 20)
+				}
+			}
+			
+			// Draws map image and points at appropriate zoom level
+			var draw = function() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+				ctx.drawImage(map_bg, 0, 0, map_size, map_size, camera.x, camera.y, Math.round(canvas.width * Math.pow(scale_factor, zoom_level - 1)), Math.round(canvas.width * Math.pow(scale_factor, zoom_level - 1)))
+				for (var i = 0; i < point_arr.length; i++) {
+					point_arr[i].draw()
+				}
+			}
+			
+			// Function to display selected point of interest in HTML
+			var fillDescription = function (poi) {
+				$("#site_name").html("<h2>" + poi.name + "</h2>")
+				$("#site_description").html("Region: " + poi.region.capitalize() + "<br/>Type: " + poi.type.capitalize() + "<p /><b>Description</b><br />" + poi.description)
+				if (poi.link.length > 1) {
+					$("#site_link").html("<a href = '" + poi.link + "' target='_blank'>Read More</a>")
+				}
+			}
+
+			// Function to handle if the map is clicked on
+			var clickMap = function (mx, my) {
+				var current_point = null
+				// Loops through all points of interest with specific zoom level to determine if user clicked on a point
+				for (var i = 0; i < point_arr.length; i++) {
+					var poi = point_arr[i]
+					if (poi.zoom == zoom_level) {
+						if (distance(mx, my, poi.projCoord().x, poi.projCoord().y) < 10) {
+							current_point = poi
+							set_zoom_level = Math.min(poi.zoom + 1, 3)
+							set_center.x = poi.x
+							set_center.y = poi.y
+							fillDescription(poi)
+						}
+					}
+				}
+				// If no point was clicked on, simply adjust center coordinates
+				if (current_point == null) {
+					set_center.x = (mx - (canvas.width / 2 - center.x * get_scale(zoom_level))) / get_scale(zoom_level)
+					set_center.y = (my - (canvas.height / 2 - center.y * get_scale(zoom_level))) / get_scale(zoom_level)
+				}
+				
+				// Updates center and zoom_level; draws map
+				update()
+			}
+				
+			// Initializes the map
+            load()
+			
+			// Functions for interaction with HTML elements
+			
+			$("#zoom_in").click(function() {
+				set_zoom_level = Math.min(3, set_zoom_level + 1)
+				update()
+			})
+			$("#zoom_out").click(function() {
+				set_zoom_level = Math.max(1, set_zoom_level - 1)
+				update()
+			})
+			
+			$("#zoom_1").click(function() {
+				set_zoom_level = 1
+				set_center = {x: map_size / 2, y: map_size / 2}
+				update()
+			})
+			
+            $("#canvas").mousedown(function(event) {
+              mouse.x = event.clientX - $("#canvas").offset().left + document.body.scrollLeft
+              mouse.y = event.clientY - $("#canvas").offset().top + document.body.scrollTop
+			  
+				if (mouse.x < canvas.width && mouse.y < canvas.height) {
+					clickMap(mouse.x, mouse.y)
+				}
+            })
+			
+			$("#canvas").mousemove(function(event) {
+				mouse.x = event.clientX - $("#canvas").offset().left + document.body.scrollLeft
+				mouse.y = event.clientY - $("#canvas").offset().top + document.body.scrollTop
+				for (var i = 0; i < point_arr.length; i++) {
+					var poi = point_arr[i]
+					if ((set_zoom_level >= poi.zoom && poi.zoom != 1) || (set_zoom_level == poi.zoom && poi.zoom == 1)) {
+						if (distance(mouse.x, mouse.y, poi.projCoord().x, poi.projCoord().y) < 10) {
+							fillDescription(poi)
+						}
+					}
+				}
+				$("#mouse_coords").html(Math.round((mouse.x - camera.x) / get_scale(zoom_level)) + "," + Math.round((mouse.y - camera.y) / get_scale(zoom_level)))
+			})
+        })
+    </script>
+	
+    <style type = "text/css">
+		#canvas {
+			border: 1px solid black;
+		}
+		table {
+			font-size: small;
+			width: 80%;
+			font-family: Arial;
+		}
+		td {
+			text-align: justify;
+			vertical-align: top;
+			height: 100%;
+		}
+		table {
+			border: none;
+			border-collapse: collapse;
+		}
+		div {
+			padding: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<table cellspacing="0" cellpadding="0">
+		<tbody>
+			<tr>
+				<td rowspan = "2">
+					<canvas id="canvas" width="700" height="500"></canvas>
+				</td>
+				<td height = "90%">
+					<div>
+						<p id = "site_name"></p>
+						<p id = "site_description"></p>
+						<p id = "site_link"></p>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td height = "10%">
+					<div>
+						<input type = "button" value = "Zoom In" id = "zoom_in" />
+						<input type = "button" value = "Zoom Out" id = "zoom_out" />
+						<input type = "button" value = "Show All" id = "zoom_1" />
+						<span id = "mouse_coords" style = "width:100px; display:inline-block;"></span>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+
+</body>
+</html>
