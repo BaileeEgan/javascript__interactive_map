@@ -5,14 +5,16 @@
     <script type = "text/javascript">
         $(document).ready(function() {
 		
-			// Creates method for strings for easy capitalization
-			String.prototype.capitalize = function() { return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase() }) }
-            
+            // CUSTOM variables: map_src, map_size, scale_factor, library
+			
 			// Source of map file (must be in jpeg, png, or likewise)
 			var map_src = "ancor_map.png"
 			
 			// Variable for size of map in pixels (map must be square)
 			var map_size = 1700
+			
+			// Variable to calculate amount of scaling per level of zoom, calculated in function below
+			var scale_factor = 2.5
 			
 			// Object database for map locations
 			// Coordinates are in units of 'true' pixels, i.e. pixel coordinates on full-sized map
@@ -62,6 +64,9 @@
 			]
 			
 			
+			// Creates method for strings for easy capitalization
+			String.prototype.capitalize = function() { return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase() }) }
+			
 			// Variables for canvas element and context variable for drawing on canvas
             var canvas = document.getElementById("canvas")
             var ctx = canvas.getContext("2d")
@@ -82,8 +87,6 @@
 			var set_center = { x: map_size / 2, y: map_size / 2 }
 			var center = { x: map_size / 2, y: map_size / 2 }
 			
-			// Variable to calculate amount of scaling per level of zoom, calculated in function below
-			var scale_factor = 2.5
 			
 			// Function to easily calculate scaling multiplier based on zoom level (z can be set_zoom_level or zoom_level, depending on need)
 			var get_scale = function (z) {
