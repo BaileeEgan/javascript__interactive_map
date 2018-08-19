@@ -1,4 +1,4 @@
-# javascript__interactive_map
+# Interactive Map of Ancor
 An html+javascript application for an interactive map of the fictional continent of Ancor. Interactivity includes clicking on/hovering over points of interest for additional information. You can customize by specifying the map image, map size, points of interest, and formatting of other html elements.
 
 Files in this repository:
@@ -10,3 +10,5 @@ index.html
 
 ancor_map.png
 - 1700x1700px image of Ancor
+
+![alt text](https://github.com/BaileeEgan/javascript__interactive_map/blob/master/ancor_map.png)
